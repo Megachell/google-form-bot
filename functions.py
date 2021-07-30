@@ -20,7 +20,7 @@ def get_name(ID): # Returns employees' name by Telegram id
 	else:
 		name = 'NO'
 	conn.close()
-	return(name)
+	return name
 
 def insert_name(ID, name): # Adds new user to the database
  	conn = sqlite3.connect('IDS.db')
@@ -46,7 +46,7 @@ def get_statuses(): # Parses google form and gets possible ftatuses
 	        if i.text[-1] != ':': statuses += [i.text]
 	  except:
 	    pass
-	return(statuses)
+	return statuses
 
 def get_names(): # Parses google form and gets possible names
 	names = []
@@ -59,7 +59,7 @@ def get_names(): # Parses google form and gets possible names
 	        names += [i.text]
 	  except:
 	    pass
-	return(names)
+	return names
 
 def no_report_today(user_id): # Parses given answers and checks if todays report already exists 
 	r = requests.get('https://docs.google.com/spreadsheet/ccc?key=1orkTbC4G8vcYlyDdPZPS3gZRBa2XT2CBMErj6U6myYk&output=csv')
@@ -88,4 +88,4 @@ if __name__ == '__main__':
 	r = requests.get('https://docs.google.com/spreadsheet/ccc?key=1orkTbC4G8vcYlyDdPZPS3gZRBa2XT2CBMErj6U6myYk&output=csv')
 	data = r.content
 	df = pd.read_csv(BytesIO(data), index_col=0)
-	print(df)
+	print df
