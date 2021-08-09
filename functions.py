@@ -35,30 +35,39 @@ def insert_name(ID, name): # Adds new user to the database
  		conn.commit()
  	conn.close() 
 
-def get_statuses(): # Parses google form and gets possible ftatuses
+def delete_user(ID):
+	conn = sqlite3.connect('IDS.db')
+	cur = conn.cursor()
+	q = "DELETE FROM IDS WHERE ID = {};".format(ID)
+	cur.execute(q)
+	conn.commit()
+	conn.close() 
+
+def get_statuses(): # Parses google form and gets possible statuses
 	statuses = []
 	text = requests.get('https://docs.google.com/forms/d/e/1FAIpQLScTYOs-Z7qggWYZoldE-pA7zWMHqh1svjLhtTVu7b_V4mwNkw/viewform')
 	soup = BeautifulSoup(text.content, 'html.parser')
-	for i in soup.find_all('span'):
-	  try:
-	    if i['dir'] == 'auto':
-	      if len(i.text.split(' ')) != 2:
-	        if i.text[-1] != ':': statuses += [i.text]
-	  except:
-	    pass
+	for tag in soup.find_all('div', {'class':'m2'}):
+		if 'data-params' in tag.attrs.keys():
+			if '1266868708' in tag['data-params']: # look for statuses only in div containing names
+				container = tag
+				break
+	for stat in tag.find_all('span', {'dir':'auto'}):
+		statuses += [stat.text]
 	return statuses
+
 
 def get_names(): # Parses google form and gets possible names
 	names = []
 	text = requests.get('https://docs.google.com/forms/d/e/1FAIpQLScTYOs-Z7qggWYZoldE-pA7zWMHqh1svjLhtTVu7b_V4mwNkw/viewform')
 	soup = BeautifulSoup(text.content, 'html.parser')
-	for i in soup.find_all('span'):
-	  try:
-	    if i['dir'] == 'auto':
-	      if len(i.text.split(' ')) == 2:
-	        names += [i.text]
-	  except:
-	    pass
+	for tag in soup.find_all('div', {'class':'m2'}):
+		if 'data-params' in tag.attrs.keys():
+			if '1962697237' in tag['data-params']: # look for names only in div containing names
+				container = tag
+				break
+	for name in tag.find_all('span', {'dir':'auto'}):
+		names += [name.text]
 	return names
 
 def no_report_today(user_id): # Parses given answers and checks if todays report already exists 
@@ -81,11 +90,7 @@ def insert_report(name, status, comment = None): # Submits post request to the s
 	if comment is not None: 
 		form_data['entry.1063605673'] = comment
 	requests.post(url, data=form_data)
-	return 'Отчет отправлен!'
+	return 'Report submitted!'
 
 if __name__ == '__main__':
-	#print('Functions live here')
-	r = requests.get('https://docs.google.com/spreadsheet/ccc?key=1orkTbC4G8vcYlyDdPZPS3gZRBa2XT2CBMErj6U6myYk&output=csv')
-	data = r.content
-	df = pd.read_csv(BytesIO(data), index_col=0)
-	print df
+	print('Functions live here')

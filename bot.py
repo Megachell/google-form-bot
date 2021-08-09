@@ -1,7 +1,6 @@
 import logging
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import sqlite3
 
@@ -10,7 +9,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import token
-from functions import insert_report, insert_name, get_name, get_names, no_report_today, get_statuses
+from functions import insert_report, insert_name, get_name, get_names, no_report_today, get_statuses, delete_user
 
 logging.basicConfig(level = logging.INFO)
 
@@ -21,13 +20,16 @@ user_cash = {} # This dict will contain users' status untill submission
 
 async def ask(user_id):  # Ask specified user their staus
 	if no_report_today(user_id):
-		statuses = get_statuses()
-		statuses_inline_kb = InlineKeyboardMarkup()
-		for i in statuses:
-			cb = 'status_'+i
-			statuses_inline_kb.add(InlineKeyboardButton(i, callback_data = cb))
-		statuses_inline_kb.add(InlineKeyboardButton('I will do it later', callback_data = 'status_cancel'))
-		await bot.send_message(user_id, 'Today status?', reply_markup = statuses_inline_kb)
+		try:
+			statuses = get_statuses()
+			statuses_inline_kb = InlineKeyboardMarkup()
+			for i in statuses:
+				cb = 'status_'+i
+				statuses_inline_kb.add(InlineKeyboardButton(i, callback_data = cb))
+			statuses_inline_kb.add(InlineKeyboardButton('I will do it later', callback_data = 'status_cancel'))
+			await bot.send_message(user_id, 'Today status?', reply_markup = statuses_inline_kb)
+		except:
+			print('Error asking user {}'.format(user_id))
 
 async def ask_all(): # Ask all users their status
 	if datetime.now().weekday() not in [5,6]:
@@ -49,6 +51,11 @@ async def welcome(message: types.Message):
 		cb = 'name_'+i
 		names_inline_kb.add(InlineKeyboardButton(i, callback_data=cb))
 	await message.answer(hello_message, reply_markup = names_inline_kb)
+
+@dp.message_handler(commands=['quit'])
+async def leave(message: types.Message):
+	delete_user(message['from']['id'])
+	await message.answer('You will not recieve requests anymore. To resume send /start again')
 
 @dp.callback_query_handler(lambda c: c.data.startswith('status_'))   # status report handler
 async def process_callback_status(callback_query: types.CallbackQuery):
