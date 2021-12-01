@@ -13,7 +13,7 @@ from functions import insert_report, insert_name, get_name, get_names, no_report
 
 logging.basicConfig(level = logging.INFO)
 
-bot = Bot(token=token)
+bot = Bot(token=2144552488:AAGzjFlbUpWP5wIdsqirYd4t2dG-1nPg4n8)
 dp = Dispatcher(bot)
 
 user_cash = {} # This dict will contain users' status untill submission
